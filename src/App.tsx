@@ -19,6 +19,12 @@ const HOLIDAYS = [
 export default function App() {
   const [progress, setProgress] = useState(0);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [decadeProgress, setDecadeProgress] = useState(0);
+  const [decadeTimeLeft, setDecadeTimeLeft] = useState({ years: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [centuryProgress, setCenturyProgress] = useState(0);
+  const [centuryTimeLeft, setCenturyTimeLeft] = useState({ years: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [millenniumProgress, setMillenniumProgress] = useState(0);
+  const [millenniumTimeLeft, setMillenniumTimeLeft] = useState({ years: 0, days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [monthProgress, setMonthProgress] = useState(0);
   const [monthTimeLeft, setMonthTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [weekProgress, setWeekProgress] = useState(0);
@@ -33,7 +39,15 @@ export default function App() {
   const [secondTimeLeft, setSecondTimeLeft] = useState({ ms: 0 });
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonthName, setCurrentMonthName] = useState("");
+  const [minimized, setMinimized] = useState<Record<string, boolean>>({});
 
+  const toggleMinimize = (id: string) => {
+    setMinimized(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const [decadeMarkers, setDecadeMarkers] = useState<{ pos: number; endPos: number; name: string }[]>([]);
+  const [centuryMarkers, setCenturyMarkers] = useState<{ pos: number; endPos: number; name: string }[]>([]);
+  const [millenniumMarkers, setMillenniumMarkers] = useState<{ pos: number; endPos: number; name: string }[]>([]);
   const [monthMarkers, setMonthMarkers] = useState<{ pos: number; endPos: number; name: string }[]>([]);
   const [quarterMarkers, setQuarterMarkers] = useState<number[]>([]);
   const [monthDayMarkers, setMonthDayMarkers] = useState<{ pos: number; endPos: number; name: string; isWeek: boolean }[]>([]);
@@ -86,6 +100,96 @@ export default function App() {
       const percentage = (elapsed / total) * 100;
 
       setProgress(percentage);
+
+      // Decade Progress Calculation
+      const decadeStartYear = Math.floor(year / 10) * 10;
+      const decadeEndYear = decadeStartYear + 10;
+      const decadeStart = new Date(decadeStartYear, 0, 1).getTime();
+      const decadeEnd = new Date(decadeEndYear, 0, 1).getTime();
+      const decadeTotal = decadeEnd - decadeStart;
+      const decadeElapsed = now.getTime() - decadeStart;
+      setDecadeProgress((decadeElapsed / decadeTotal) * 100);
+
+      const decMarkers = [];
+      for (let y = 0; y < 10; y++) {
+        const yStart = new Date(decadeStartYear + y, 0, 1).getTime();
+        const yEnd = new Date(decadeStartYear + y + 1, 0, 1).getTime();
+        decMarkers.push({
+          pos: ((yStart - decadeStart) / decadeTotal) * 100,
+          endPos: ((yEnd - decadeStart) / decadeTotal) * 100,
+          name: (decadeStartYear + y).toString()
+        });
+      }
+      setDecadeMarkers(decMarkers);
+
+      const decadeRemaining = decadeEnd - now.getTime();
+      setDecadeTimeLeft({
+        years: Math.floor(decadeRemaining / (1000 * 60 * 60 * 24 * 365.25)),
+        days: Math.floor((decadeRemaining % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((decadeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((decadeRemaining % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((decadeRemaining % (1000 * 60)) / 1000)
+      });
+
+      // Century Progress Calculation
+      const centuryStartYear = Math.floor(year / 100) * 100;
+      const centuryEndYear = centuryStartYear + 100;
+      const centuryStart = new Date(centuryStartYear, 0, 1).getTime();
+      const centuryEnd = new Date(centuryEndYear, 0, 1).getTime();
+      const centuryTotal = centuryEnd - centuryStart;
+      const centuryElapsed = now.getTime() - centuryStart;
+      setCenturyProgress((centuryElapsed / centuryTotal) * 100);
+
+      const cenMarkers = [];
+      for (let y = 0; y < 100; y += 10) {
+        const yStart = new Date(centuryStartYear + y, 0, 1).getTime();
+        const yEnd = new Date(centuryStartYear + y + 10, 0, 1).getTime();
+        cenMarkers.push({
+          pos: ((yStart - centuryStart) / centuryTotal) * 100,
+          endPos: ((yEnd - centuryStart) / centuryTotal) * 100,
+          name: (centuryStartYear + y).toString()
+        });
+      }
+      setCenturyMarkers(cenMarkers);
+
+      const centuryRemaining = centuryEnd - now.getTime();
+      setCenturyTimeLeft({
+        years: Math.floor(centuryRemaining / (1000 * 60 * 60 * 24 * 365.25)),
+        days: Math.floor((centuryRemaining % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((centuryRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((centuryRemaining % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((centuryRemaining % (1000 * 60)) / 1000)
+      });
+
+      // Millennium Progress Calculation
+      const millenniumStartYear = Math.floor(year / 1000) * 1000;
+      const millenniumEndYear = millenniumStartYear + 1000;
+      const millenniumStart = new Date(millenniumStartYear, 0, 1).getTime();
+      const millenniumEnd = new Date(millenniumEndYear, 0, 1).getTime();
+      const millenniumTotal = millenniumEnd - millenniumStart;
+      const millenniumElapsed = now.getTime() - millenniumStart;
+      setMillenniumProgress((millenniumElapsed / millenniumTotal) * 100);
+
+      const milMarkers = [];
+      for (let y = 0; y < 1000; y += 100) {
+        const yStart = new Date(millenniumStartYear + y, 0, 1).getTime();
+        const yEnd = new Date(millenniumStartYear + y + 100, 0, 1).getTime();
+        milMarkers.push({
+          pos: ((yStart - millenniumStart) / millenniumTotal) * 100,
+          endPos: ((yEnd - millenniumStart) / millenniumTotal) * 100,
+          name: (millenniumStartYear + y).toString()
+        });
+      }
+      setMillenniumMarkers(milMarkers);
+
+      const millenniumRemaining = millenniumEnd - now.getTime();
+      setMillenniumTimeLeft({
+        years: Math.floor(millenniumRemaining / (1000 * 60 * 60 * 24 * 365.25)),
+        days: Math.floor((millenniumRemaining % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((millenniumRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((millenniumRemaining % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((millenniumRemaining % (1000 * 60)) / 1000)
+      });
 
       // Month markers
       const mMarkers = [];
@@ -368,397 +472,726 @@ export default function App() {
     <div className="min-h-screen bg-[#1a1a1a] flex flex-col items-center justify-center p-6 font-sans text-[#1a1a1a]">
       <div className="w-full max-w-[80%] space-y-4">
         <div className="space-y-2">
+          {/* Millennium Progress Widget */}
+          <div className="flex flex-col w-full rounded-xl overflow-hidden">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('millennium')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['millennium'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Millennium Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={millenniumProgress} isVisible={!!minimized['millennium']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
+                {millenniumProgress.toFixed(6)}% ELAPSED
+              </span>
+            </div>
+
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['millennium'] ? 0 : 'auto', opacity: minimized['millennium'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {millenniumMarkers.map((marker, i) => (
+                  <div key={`millennium-marker-${i}`}>
+                    {i > 0 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
+                        style={{ left: `${marker.pos}%` }}
+                      />
+                    )}
+                    <div
+                      className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${marker.pos + (marker.endPos - marker.pos) / 2}%` }}
+                    >
+                      {marker.name}
+                    </div>
+                  </div>
+                ))}
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${millenniumProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Years" value={millenniumTimeLeft.years} />
+                <CompactStat label="Days" value={millenniumTimeLeft.days} />
+                <CompactStat label="Hours" value={millenniumTimeLeft.hours} />
+                <CompactStat label="Minutes" value={millenniumTimeLeft.minutes} />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Century Progress Widget */}
+          <div className="flex flex-col w-full rounded-xl overflow-hidden">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('century')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['century'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Century Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={centuryProgress} isVisible={!!minimized['century']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
+                {centuryProgress.toFixed(6)}% ELAPSED
+              </span>
+            </div>
+
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['century'] ? 0 : 'auto', opacity: minimized['century'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {centuryMarkers.map((marker, i) => (
+                  <div key={`century-marker-${i}`}>
+                    {i > 0 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
+                        style={{ left: `${marker.pos}%` }}
+                      />
+                    )}
+                    <div
+                      className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${marker.pos + (marker.endPos - marker.pos) / 2}%` }}
+                    >
+                      {marker.name}
+                    </div>
+                  </div>
+                ))}
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${centuryProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Years" value={centuryTimeLeft.years} />
+                <CompactStat label="Days" value={centuryTimeLeft.days} />
+                <CompactStat label="Hours" value={centuryTimeLeft.hours} />
+                <CompactStat label="Minutes" value={centuryTimeLeft.minutes} />
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Decade Progress Widget */}
+          <div className="flex flex-col w-full rounded-xl overflow-hidden">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('decade')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['decade'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Decade Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={decadeProgress} isVisible={!!minimized['decade']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
+                {decadeProgress.toFixed(6)}% ELAPSED
+              </span>
+            </div>
+
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['decade'] ? 0 : 'auto', opacity: minimized['decade'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {decadeMarkers.map((marker, i) => (
+                  <div key={`decade-marker-${i}`}>
+                    {i > 0 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
+                        style={{ left: `${marker.pos}%` }}
+                      />
+                    )}
+                    <div
+                      className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${marker.pos + (marker.endPos - marker.pos) / 2}%` }}
+                    >
+                      {marker.name}
+                    </div>
+                  </div>
+                ))}
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${decadeProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Years" value={decadeTimeLeft.years} />
+                <CompactStat label="Days" value={decadeTimeLeft.days} />
+                <CompactStat label="Hours" value={decadeTimeLeft.hours} />
+                <CompactStat label="Minutes" value={decadeTimeLeft.minutes} />
+              </div>
+            </motion.div>
+          </div>
+
           {/* Year Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Year Progress {currentYear}
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('year')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['year'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Year Progress {currentYear}
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={progress} isVisible={!!minimized['year']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {progress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Month Sections & Labels */}
-              {monthMarkers.map((month, i) => (
-                <div key={`month-section-${i}`}>
-                  {/* Divider (skip Jan as it's the start) */}
-                  {i > 0 && (
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['year'] ? 0 : 'auto', opacity: minimized['year'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Month Sections & Labels */}
+                {monthMarkers.map((month, i) => (
+                  <div key={`month-section-${i}`}>
+                    {/* Divider (skip Jan as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
+                        style={{ left: `${month.pos}%` }}
+                      />
+                    )}
+                    {/* Label */}
                     <div
-                      className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
-                      style={{ left: `${month.pos}%` }}
-                    />
-                  )}
-                  {/* Label */}
+                      className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${month.pos + (month.endPos - month.pos) / 2}%` }}
+                    >
+                      {month.name}.
+                    </div>
+                  </div>
+                ))}
+
+                {/* Quarter Dividers */}
+                {quarterMarkers.map((pos, i) => (
                   <div
-                    className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                    style={{ left: `${month.pos + (month.endPos - month.pos) / 2}%` }}
+                    key={`quarter-${i}`}
+                    className="absolute bottom-0 h-1/4 w-[1px] bg-[#444444] z-10"
+                    style={{ left: `${pos}%` }}
+                  />
+                ))}
+
+                {/* Holiday Markers */}
+                {holidayMarkers.map((holiday, i) => (
+                  <div
+                    key={`holiday-${i}`}
+                    className="absolute bottom-0 h-1/2 w-[5px] -ml-[2.5px] z-20 group cursor-help"
+                    style={{ left: `${holiday.pos}%`, backgroundColor: holiday.color }}
+                    title={holiday.name}
                   >
-                    {month.name}.
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#1a1a1a] text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      {holiday.name}
+                    </div>
                   </div>
-                </div>
-              ))}
-
-              {/* Quarter Dividers */}
-              {quarterMarkers.map((pos, i) => (
-                <div
-                  key={`quarter-${i}`}
-                  className="absolute bottom-0 h-1/4 w-[1px] bg-[#444444] z-10"
-                  style={{ left: `${pos}%` }}
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
                 />
-              ))}
+              </div>
 
-              {/* Holiday Markers */}
-              {holidayMarkers.map((holiday, i) => (
-                <div
-                  key={`holiday-${i}`}
-                  className="absolute bottom-0 h-1/2 w-[5px] -ml-[2.5px] z-20 group cursor-help"
-                  style={{ left: `${holiday.pos}%`, backgroundColor: holiday.color }}
-                  title={holiday.name}
-                >
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#1a1a1a] text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    {holiday.name}
-                  </div>
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
-
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="Days" value={timeLeft.days} />
-              <CompactStat label="Hours" value={timeLeft.hours} />
-              <CompactStat label="Minutes" value={timeLeft.minutes} />
-              <CompactStat label="Seconds" value={timeLeft.seconds} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Days" value={timeLeft.days} />
+                <CompactStat label="Hours" value={timeLeft.hours} />
+                <CompactStat label="Minutes" value={timeLeft.minutes} />
+                <CompactStat label="Seconds" value={timeLeft.seconds} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Month Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Month Progress ({currentMonthName})
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('month')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['month'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Month Progress ({currentMonthName})
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={monthProgress} isVisible={!!minimized['month']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {monthProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Day Sections & Labels */}
-              {monthDayMarkers.map((day, i) => (
-                <div key={`month-day-${i}`}>
-                  {/* Divider (skip first day as it's the start) */}
-                  {i > 0 && (
-                    <div
-                      className={`absolute bottom-0 bg-[#444444] z-10 ${day.isWeek ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
-                      style={{ left: `${day.pos}%` }}
-                    />
-                  )}
-                </div>
-              ))}
-
-              {/* Holiday Markers */}
-              {monthHolidayMarkers.map((holiday, i) => (
-                <div
-                  key={`month-holiday-${i}`}
-                  className="absolute bottom-0 h-1/2 w-[5px] -ml-[2.5px] z-20 group cursor-help"
-                  style={{ left: `${holiday.pos}%`, backgroundColor: holiday.color }}
-                  title={holiday.name}
-                >
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#1a1a1a] text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-                    {holiday.name}
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['month'] ? 0 : 'auto', opacity: minimized['month'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Day Sections & Labels */}
+                {monthDayMarkers.map((day, i) => (
+                  <div key={`month-day-${i}`}>
+                    {/* Divider (skip first day as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className={`absolute bottom-0 bg-[#444444] z-10 ${day.isWeek ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
+                        style={{ left: `${day.pos}%` }}
+                      />
+                    )}
                   </div>
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${monthProgress}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
+                ))}
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="Days" value={monthTimeLeft.days} />
-              <CompactStat label="Hours" value={monthTimeLeft.hours} />
-              <CompactStat label="Minutes" value={monthTimeLeft.minutes} />
-              <CompactStat label="Seconds" value={monthTimeLeft.seconds} />
-            </div>
+                {/* Holiday Markers */}
+                {monthHolidayMarkers.map((holiday, i) => (
+                  <div
+                    key={`month-holiday-${i}`}
+                    className="absolute bottom-0 h-1/2 w-[5px] -ml-[2.5px] z-20 group cursor-help"
+                    style={{ left: `${holiday.pos}%`, backgroundColor: holiday.color }}
+                    title={holiday.name}
+                  >
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-[#1a1a1a] text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      {holiday.name}
+                    </div>
+                  </div>
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${monthProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
+
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Days" value={monthTimeLeft.days} />
+                <CompactStat label="Hours" value={monthTimeLeft.hours} />
+                <CompactStat label="Minutes" value={monthTimeLeft.minutes} />
+                <CompactStat label="Seconds" value={monthTimeLeft.seconds} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Week Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Week Progress
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('week')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['week'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Week Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={weekProgress} isVisible={!!minimized['week']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {weekProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Day Sections & Labels */}
-              {dayMarkers.map((day, i) => (
-                <div key={`day-section-${i}`}>
-                  {/* Divider (skip first day as it's the start) */}
-                  {i > 0 && (
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['week'] ? 0 : 'auto', opacity: minimized['week'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Day Sections & Labels */}
+                {dayMarkers.map((day, i) => (
+                  <div key={`day-section-${i}`}>
+                    {/* Divider (skip first day as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
+                        style={{ left: `${day.pos}%` }}
+                      />
+                    )}
+                    {/* Label */}
                     <div
-                      className="absolute top-0 bottom-0 w-[4px] -ml-[2px] bg-[#444444] z-10"
-                      style={{ left: `${day.pos}%` }}
-                    />
-                  )}
-                  {/* Label */}
-                  <div
-                    className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                    style={{ left: `${day.pos + (day.endPos - day.pos) / 2}%` }}
-                  >
-                    {day.name}.
+                      className="absolute top-1 z-30 text-[9px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${day.pos + (day.endPos - day.pos) / 2}%` }}
+                    >
+                      {day.name}.
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
 
-              {/* Day Quarter Dividers */}
-              {dayQuarterMarkers.map((pos, i) => (
-                <div
-                  key={`day-quarter-${i}`}
-                  className="absolute bottom-0 h-1/4 w-[1px] bg-[#444444] z-10"
-                  style={{ left: `${pos}%` }}
+                {/* Day Quarter Dividers */}
+                {dayQuarterMarkers.map((pos, i) => (
+                  <div
+                    key={`day-quarter-${i}`}
+                    className="absolute bottom-0 h-1/4 w-[1px] bg-[#444444] z-10"
+                    style={{ left: `${pos}%` }}
+                  />
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${weekProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
                 />
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${weekProgress}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
+              </div>
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="Days" value={weekTimeLeft.days} />
-              <CompactStat label="Hours" value={weekTimeLeft.hours} />
-              <CompactStat label="Minutes" value={weekTimeLeft.minutes} />
-              <CompactStat label="Seconds" value={weekTimeLeft.seconds} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Days" value={weekTimeLeft.days} />
+                <CompactStat label="Hours" value={weekTimeLeft.hours} />
+                <CompactStat label="Minutes" value={weekTimeLeft.minutes} />
+                <CompactStat label="Seconds" value={weekTimeLeft.seconds} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Day Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Day Progress
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('day')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['day'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Day Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={dayProgress} isVisible={!!minimized['day']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {dayProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Hour Sections & Labels */}
-              {hourMarkers.map((hour, i) => (
-                <div key={`hour-section-${i}`}>
-                  {/* Divider (skip first hour as it's the start) */}
-                  {i > 0 && (
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['day'] ? 0 : 'auto', opacity: minimized['day'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Hour Sections & Labels */}
+                {hourMarkers.map((hour, i) => (
+                  <div key={`hour-section-${i}`}>
+                    {/* Divider (skip first hour as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className={`absolute bottom-0 bg-[#444444] z-10 ${hour.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
+                        style={{ left: `${hour.pos}%` }}
+                      />
+                    )}
+                    {/* Label */}
                     <div
-                      className={`absolute bottom-0 bg-[#444444] z-10 ${hour.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
-                      style={{ left: `${hour.pos}%` }}
-                    />
-                  )}
-                  {/* Label */}
-                  <div
-                    className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                    style={{ left: `${hour.pos + (hour.endPos - hour.pos) / 2}%` }}
-                  >
-                    {hour.name}
+                      className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                      style={{ left: `${hour.pos + (hour.endPos - hour.pos) / 2}%` }}
+                    >
+                      {hour.name}
+                    </div>
                   </div>
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${dayProgress}%` }}
-                transition={{ duration: 1, ease: "easeOut" }}
-              />
-            </div>
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${dayProgress}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                />
+              </div>
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="Hours" value={dayTimeLeft.hours} />
-              <CompactStat label="Minutes" value={dayTimeLeft.minutes} />
-              <CompactStat label="Seconds" value={dayTimeLeft.seconds} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Hours" value={dayTimeLeft.hours} />
+                <CompactStat label="Minutes" value={dayTimeLeft.minutes} />
+                <CompactStat label="Seconds" value={dayTimeLeft.seconds} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Hour Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Hour Progress
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('hour')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['hour'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Hour Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={hourProgress} isVisible={!!minimized['hour']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {hourProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Minute Sections & Labels */}
-              {minuteMarkers.map((min, i) => (
-                <div key={`min-section-${i}`}>
-                  {/* Divider (skip first as it's the start) */}
-                  {i > 0 && (
-                    <div
-                      className={`absolute bottom-0 bg-[#444444] z-10 ${min.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
-                      style={{ left: `${min.pos}%` }}
-                    />
-                  )}
-                  {/* Label every 5 mins */}
-                  {min.name && (
-                    <div
-                      className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                      style={{ left: `${min.pos}%` }}
-                    >
-                      {min.name}
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${hourProgress}%` }}
-                transition={{ duration: 0.1, ease: "linear" }}
-              />
-            </div>
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['hour'] ? 0 : 'auto', opacity: minimized['hour'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Minute Sections & Labels */}
+                {minuteMarkers.map((min, i) => (
+                  <div key={`min-section-${i}`}>
+                    {/* Divider (skip first as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className={`absolute bottom-0 bg-[#444444] z-10 ${min.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
+                        style={{ left: `${min.pos}%` }}
+                      />
+                    )}
+                    {/* Label every 5 mins */}
+                    {min.name && (
+                      <div
+                        className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                        style={{ left: `${min.pos}%` }}
+                      >
+                        {min.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${hourProgress}%` }}
+                  transition={{ duration: 0.1, ease: "linear" }}
+                />
+              </div>
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="Seconds" value={hourTimeLeft.seconds} />
-              <CompactStat label="MS" value={hourTimeLeft.ms} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="Seconds" value={hourTimeLeft.seconds} />
+                <CompactStat label="MS" value={hourTimeLeft.ms} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Minute Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Minute Progress
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('minute')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['minute'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Minute Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={minuteProgress} isVisible={!!minimized['minute']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {minuteProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* Second Sections & Labels */}
-              {secondMarkers.map((sec, i) => (
-                <div key={`sec-section-${i}`}>
-                  {/* Divider (skip first as it's the start) */}
-                  {i > 0 && (
-                    <div
-                      className={`absolute bottom-0 bg-[#444444] z-10 ${sec.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
-                      style={{ left: `${sec.pos}%` }}
-                    />
-                  )}
-                  {/* Label every 5 secs */}
-                  {sec.name && (
-                    <div
-                      className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                      style={{ left: `${sec.pos}%` }}
-                    >
-                      {sec.name}
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${minuteProgress}%` }}
-                transition={{ duration: 0.05, ease: "linear" }}
-              />
-            </div>
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['minute'] ? 0 : 'auto', opacity: minimized['minute'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* Second Sections & Labels */}
+                {secondMarkers.map((sec, i) => (
+                  <div key={`sec-section-${i}`}>
+                    {/* Divider (skip first as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className={`absolute bottom-0 bg-[#444444] z-10 ${sec.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
+                        style={{ left: `${sec.pos}%` }}
+                      />
+                    )}
+                    {/* Label every 5 secs */}
+                    {sec.name && (
+                      <div
+                        className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                        style={{ left: `${sec.pos}%` }}
+                      >
+                        {sec.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${minuteProgress}%` }}
+                  transition={{ duration: 0.05, ease: "linear" }}
+                />
+              </div>
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="MS Remaining" value={minuteTimeLeft.ms} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="MS Remaining" value={minuteTimeLeft.ms} />
+              </div>
+            </motion.div>
           </div>
 
           {/* Second Progress Widget */}
           <div className="flex flex-col w-full rounded-xl overflow-hidden">
             {/* Top Row: Title & Percentage */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-between px-4">
-              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Second Progress
-              </span>
-              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums">
+            <div 
+              className="h-[25px] bg-[#2a2a2a] grid grid-cols-3 items-center px-4 cursor-pointer hover:bg-[#333333] transition-colors"
+              onClick={() => toggleMinimize('second')}
+            >
+              <div className="flex items-center gap-2 justify-self-start">
+                <motion.span
+                  animate={{ rotate: minimized['second'] ? -90 : 0 }}
+                  className="text-[8px] text-white/40"
+                >
+                  ▼
+                </motion.span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+                  Second Progress
+                </span>
+              </div>
+              <div className="w-full flex justify-center">
+                <MiniProgressBar progress={secondProgress} isVisible={!!minimized['second']} />
+              </div>
+              <span className="text-[11px] font-bold tracking-[0.1em] text-white/80 tabular-nums justify-self-end">
                 {secondProgress.toFixed(6)}% ELAPSED
               </span>
             </div>
 
-            {/* Middle Row: Progress Bar */}
-            <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-black">
-              {/* MS Sections & Labels */}
-              {msMarkers.map((ms, i) => (
-                <div key={`ms-section-${i}`}>
-                  {/* Divider (skip first as it's the start) */}
-                  {i > 0 && (
-                    <div
-                      className={`absolute bottom-0 bg-[#444444] z-10 ${ms.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
-                      style={{ left: `${ms.pos}%` }}
-                    />
-                  )}
-                  {/* Label every 100ms */}
-                  {ms.name && (
-                    <div
-                      className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
-                      style={{ left: `${ms.pos}%` }}
-                    >
-                      {ms.name}
-                    </div>
-                  )}
-                </div>
-              ))}
-              
-              <motion.div
-                className="absolute top-0 left-0 h-full bg-[#144982]"
-                initial={{ width: 0 }}
-                animate={{ width: `${secondProgress}%` }}
-                transition={{ duration: 0.01, ease: "linear" }}
-              />
-            </div>
+            <motion.div
+              initial={false}
+              animate={{ height: minimized['second'] ? 0 : 'auto', opacity: minimized['second'] ? 0 : 1 }}
+              className="overflow-hidden"
+            >
+              {/* Middle Row: Progress Bar */}
+              <div className="relative h-[40px] w-full bg-[#2a2a2a] shadow-inner border-y border-[#1a1a1a]">
+                {/* MS Sections & Labels */}
+                {msMarkers.map((ms, i) => (
+                  <div key={`ms-section-${i}`}>
+                    {/* Divider (skip first as it's the start) */}
+                    {i > 0 && (
+                      <div
+                        className={`absolute bottom-0 bg-[#444444] z-10 ${ms.isMajor ? 'top-0 w-[3px] -ml-[1.5px]' : 'h-1/4 w-[1px] -ml-[0.5px]'}`}
+                        style={{ left: `${ms.pos}%` }}
+                      />
+                    )}
+                    {/* Label every 100ms */}
+                    {ms.name && (
+                      <div
+                        className="absolute top-1 z-30 text-[7px] font-bold uppercase tracking-tighter text-white/60 -translate-x-1/2"
+                        style={{ left: `${ms.pos}%` }}
+                      >
+                        {ms.name}
+                      </div>
+                    )}
+                  </div>
+                ))}
+                
+                <motion.div
+                  className="absolute top-0 left-0 h-full bg-[#144982]"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${secondProgress}%` }}
+                  transition={{ duration: 0.01, ease: "linear" }}
+                />
+              </div>
 
-            {/* Bottom Row: Countdown Stats */}
-            <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
-              <CompactStat label="MS Remaining" value={secondTimeLeft.ms} />
-            </div>
+              {/* Bottom Row: Countdown Stats */}
+              <div className="h-[25px] bg-[#2a2a2a] flex items-center justify-around px-4">
+                <CompactStat label="MS Remaining" value={secondTimeLeft.ms} />
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -775,6 +1208,22 @@ function CompactStat({ label, value }: { label: string; value: number }) {
       <span className="text-[11px] font-bold text-white/80 tabular-nums">
         {value.toLocaleString()}
       </span>
+    </div>
+  );
+}
+
+function MiniProgressBar({ progress, isVisible }: { progress: number; isVisible: boolean }) {
+  return (
+    <div className="w-full h-[6px] max-w-[250px] bg-white/5 rounded-full overflow-hidden relative">
+      <motion.div
+        className="absolute top-0 left-0 h-full bg-[#144982]"
+        initial={false}
+        animate={{ 
+          width: isVisible ? `${progress}%` : '0%',
+          opacity: isVisible ? 1 : 0 
+        }}
+        transition={{ duration: 0.3 }}
+      />
     </div>
   );
 }
