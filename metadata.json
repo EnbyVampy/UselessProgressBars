@@ -1,0 +1,5 @@
+{
+  "name": "Year Progress Tracker",
+  "description": "A minimal app that visualizes how much of the current year has elapsed with a real-time progress bar.",
+  "requestFramePermissions": []
+}
